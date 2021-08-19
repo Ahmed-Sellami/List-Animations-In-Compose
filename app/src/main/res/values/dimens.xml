@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="list_top_padding">14dp</dimen>
+    <dimen name="image_size">100dp</dimen>
+    <dimen name="particle_radius">10dp</dimen>
+    <dimen name="slot_padding">12dp</dimen>
+    <dimen name="horizontal_item_padding">16.dp</dimen>
+</resources>
