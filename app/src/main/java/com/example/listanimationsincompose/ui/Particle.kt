@@ -11,7 +11,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.tooling.preview.Preview
-import com.example.listanimationsincompose.ui.theme.DarkPurple
+import com.example.listanimationsincompose.ui.theme.Purple
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
@@ -66,7 +66,7 @@ fun ParticlePreview() {
             Particle(
                 modifier = Modifier.align(Alignment.Center),
                 isFired = isVisible,
-                color = DarkPurple
+                color = Purple
             ) { }
         }
         Switch(checked = isVisible, onCheckedChange = { isVisible = !isVisible })

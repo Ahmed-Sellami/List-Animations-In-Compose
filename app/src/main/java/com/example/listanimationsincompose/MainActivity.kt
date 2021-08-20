@@ -42,21 +42,21 @@ val allShoesArticles = arrayOf(
         price = 199.8f,
         width = "2X Wide",
         drawable = R.drawable.ic_shoes_1,
-        color = DarkRed
+        color = Red
     ),
     ShoesArticle(
         title = "Nike Joyride Run V",
         price = 249.1f,
         width = "3X Wide",
         drawable = R.drawable.ic_shoes_2,
-        color = DarkBlue
+        color = Blue
     ),
     ShoesArticle(
         title = "Nike Space Hippie 04",
         price = 179.7f,
         width = "Extra Wide",
         drawable = R.drawable.ic_shoes_3,
-        color = DarkPurple
+        color = Purple
     )
 )
 
@@ -65,7 +65,7 @@ val allShoesArticles = arrayOf(
 fun Home() {
     var isFired by remember { mutableStateOf(false) }
     var particleColor by remember { mutableStateOf(Color.White) }
-    val colorsArray = arrayOf(DarkPurple, DarkBlue, DarkRed)
+    val colorsArray = arrayOf(Purple, Blue, Red)
     val shoesArticles = remember { mutableStateListOf<ShoesArticle>() }
     val isVisibleStates = remember {
         mutableStateMapOf<ShoesArticle, Boolean>()

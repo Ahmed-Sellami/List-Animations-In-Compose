@@ -27,22 +27,3 @@ val Typography = Typography(
     )
     */
 )
-
-val PurpleGradient = Brush.horizontalGradient(
-    colors = listOf(
-        DarkPurple,
-        LightPurple
-    )
-)
-val BlueGradient = Brush.horizontalGradient(
-    colors = listOf(
-        DarkBlue,
-        LightBlue
-    )
-)
-val RedGradient = Brush.horizontalGradient(
-    colors = listOf(
-        DarkRed,
-        LightRed
-    )
-)

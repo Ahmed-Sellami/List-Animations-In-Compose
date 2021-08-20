@@ -16,6 +16,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -33,7 +34,10 @@ var maxRadiusPx = 0f
 @ExperimentalAnimationApi
 @Composable
 fun ShoesCard(shoesArticle: ShoesArticle, isVisible: Boolean) {
-    val particleRadius = dimensionResource(id = R.dimen.particle_radius).value
+    val particleRadius: Float
+    with(LocalDensity.current) {
+        particleRadius = dimensionResource(id = R.dimen.particle_radius).toPx()
+    }
     var radius by remember { mutableStateOf(particleRadius) }
     var visibilityAlpha by remember { mutableStateOf(0f) }
 
@@ -99,7 +103,7 @@ fun ShoesCard(shoesArticle: ShoesArticle, isVisible: Boolean) {
         )
     }
 
-    val animatedRadius = remember { Animatable(0f) }
+    val animatedRadius = remember { Animatable(particleRadius) }
     val animatedAlpha = remember { Animatable(0f) }
 
     LaunchedEffect(isVisible) {
@@ -126,7 +130,7 @@ fun ShoesCardPreview() {
                 price = 199.8f,
                 width = "2X",
                 drawable = R.drawable.ic_shoes_1,
-                color = DarkPurple
+                color = Purple
             ),
             isVisible
         )
