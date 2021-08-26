@@ -63,9 +63,11 @@ val allShoesArticles = arrayOf(
 @ExperimentalAnimationApi
 @Composable
 fun Home() {
+    val colorsArray = arrayOf(Purple, Blue, Red)
+
     var isFired by remember { mutableStateOf(false) }
     var particleColor by remember { mutableStateOf(Color.White) }
-    val colorsArray = arrayOf(Purple, Blue, Red)
+
     val shoesArticles = remember { mutableStateListOf<ShoesArticle>() }
     val isVisibleStates = remember {
         mutableStateMapOf<ShoesArticle, Boolean>()

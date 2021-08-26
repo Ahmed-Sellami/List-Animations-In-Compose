@@ -29,7 +29,7 @@ import com.example.listanimationsincompose.model.ShoesArticle
 import com.example.listanimationsincompose.ui.theme.*
 import kotlin.math.hypot
 
-var maxRadiusPx = 0f
+private var maxRadiusPx = 0f
 
 @ExperimentalAnimationApi
 @Composable
@@ -42,8 +42,7 @@ fun ShoesCard(shoesArticle: ShoesArticle, isVisible: Boolean) {
     var visibilityAlpha by remember { mutableStateOf(0f) }
 
     Box(
-        Modifier
-            .padding(horizontal = 16.dp)
+        Modifier.padding(horizontal = 16.dp)
     ) {
         Column(
             modifier = Modifier
