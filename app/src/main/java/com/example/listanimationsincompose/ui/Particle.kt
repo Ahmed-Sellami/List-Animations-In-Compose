@@ -33,10 +33,7 @@ fun Particle(modifier: Modifier, isFired: Boolean, color: Color, onCompleteAnim:
         itemHeight = dimensionResource(id = R.dimen.image_size).toPx()
     }
     var topTranslation by remember { mutableStateOf(0f) }
-    /*val topTranslation by animateFloatAsState(
-        targetValue = if (isFired) radius + topPadding + itemHeight / 2 else 0f,
-        finishedListener = {  }
-    )*/
+    
     Canvas(modifier.size(radiusDp * 2)) {
         translate(top = topTranslation) {
             drawCircle(
