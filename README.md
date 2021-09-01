@@ -8,7 +8,7 @@ This repository is the resource of a series of articles. Each branch represents 
     <th>Drag to reorder</th>
   </tr>
   <tr>
-    <td><img width=500px src="pics/Add_Item.png"/>https://developersbreach.com/add-item-animation-compose/</td>
+    <td><img src="pics/Add_Item.png"/>https://developersbreach.com/add-item-animation-compose/</td>
     <td></td> 
     <td></td>
   </tr>
