@@ -66,7 +66,7 @@ fun Home() {
                     Text(text = "List Animations In Compose")
                 },
                 actions = {
-                    IconButton(onClick = { /* Add item */ }) {
+                    IconButton(onClick = { shoesArticles.addAll(allShoesArticles) }) {
                         Icon(Icons.Filled.AddCircle, contentDescription = null)
                     }
                 },
@@ -76,7 +76,8 @@ fun Home() {
     ) { innerPadding ->
         ShoesList(
             modifier = Modifier.padding(innerPadding),
-            shoesArticles = shoesArticles
+            shoesArticles = shoesArticles,
+            onDelete = { shoesArticles.remove(it) }
         )
     }
 }
@@ -85,7 +86,8 @@ fun Home() {
 @Composable
 fun ShoesList(
     modifier: Modifier,
-    shoesArticles: MutableList<ShoesArticle>
+    shoesArticles: MutableList<ShoesArticle>,
+    onDelete: (shoesArticle: ShoesArticle) -> Unit
 ) {
     val lazyListState = rememberLazyListState()
     LazyColumn(
@@ -96,7 +98,9 @@ fun ShoesList(
             val shoesArticle = shoesArticles.getOrNull(index)
             if (shoesArticle != null) {
                 key(shoesArticle) {
-                    ShoesCard(shoesArticle = shoesArticle)
+                    ShoesCard(shoesArticle = shoesArticle) {
+                        onDelete(shoesArticle)
+                    }
                 }
             }
         }
