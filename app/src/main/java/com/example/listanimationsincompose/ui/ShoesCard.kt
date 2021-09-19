@@ -1,38 +1,23 @@
 package com.example.listanimationsincompose.ui
 
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Rect
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.graphics.drawscope.DrawStyle
 import androidx.compose.ui.graphics.drawscope.translate
-import androidx.compose.ui.graphics.lerp
-import androidx.compose.ui.graphics.vector.PathNode
-import androidx.compose.ui.graphics.vector.addPathNodes
-import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
@@ -42,40 +27,54 @@ import com.example.listanimationsincompose.Main
 import com.example.listanimationsincompose.R
 import com.example.listanimationsincompose.model.ShoesArticle
 import com.example.listanimationsincompose.ui.theme.*
-import java.lang.Math.round
 import kotlin.math.cos
-import kotlin.math.pow
 import kotlin.math.roundToInt
 import kotlin.math.sin
 
 @ExperimentalAnimationApi
 @Composable
-fun ShoesCard(shoesArticle: ShoesArticle, onDelete: () -> Unit) {
-    val offsetX = remember { Animatable(0f) }
-
+fun ShoesCard(shoesArticle: ShoesArticle, onDeleted: () -> Unit) {
     val particleRadiusDp = dimensionResource(id = R.dimen.particle_radius)
     val particleRadius: Float
-    val imageSizeDp = dimensionResource(id = R.dimen.image_size)
-    val imageSize: Float
+    val itemHeightDp = dimensionResource(id = R.dimen.image_size)
+    val itemHeight: Float
     val explosionParticleRadius: Float
     val explosionRadius: Float
     with(LocalDensity.current) {
         particleRadius = particleRadiusDp.toPx()
-        imageSize = imageSizeDp.toPx()
+        itemHeight = itemHeightDp.toPx()
         explosionParticleRadius = dimensionResource(id = R.dimen.explosion_particle_radius).toPx()
         explosionRadius = dimensionResource(id = R.dimen.explosion_radius).toPx()
     }
+    val screenWidth: Int
+    with(LocalConfiguration.current) {
+        screenWidth = this.screenWidthDp
+    }
+    val radius = itemHeight * 0.5f
+    val funnelWidth = radius * 3
+    val sideShapeWidth = funnelWidth + particleRadius * 2
+
+    val offsetX = remember { Animatable(0f) }
+
+    val explosionPercentage = remember { mutableStateOf(0f) }
+
+    val funnelInitialTranslation = -funnelWidth - particleRadius
+    val funnelTranslation = remember { mutableStateOf(funnelInitialTranslation) }
+    funnelTranslation.value = (offsetX.value + funnelInitialTranslation).negateIfPositive {
+        explosionPercentage.value = (offsetX.value + funnelInitialTranslation) / screenWidth
+    }
+
     Box {
         Canvas(
-            Modifier.height(imageSizeDp)
-        )
-        {
-            val radius = size.height * 0.5f
-            translate(
-                (offsetX.value - radius * 3f - particleRadius).coerceAtMost(0f)
-            ) {
+            Modifier.height(itemHeightDp)
+        ) {
+            translate(funnelTranslation.value) {
                 drawPath(
-                    path = drawSideShape(radius = radius, particleRadius = particleRadius * 3 / 4f),
+                    path = drawFunnel(
+                        upperRadius = radius,
+                        lowerRadius = particleRadius * 3 / 4f,
+                        width = funnelWidth
+                    ),
                     color = shoesArticle.color
                 )
             }
@@ -84,33 +83,48 @@ fun ShoesCard(shoesArticle: ShoesArticle, onDelete: () -> Unit) {
             }
         }
         Canvas(modifier = Modifier
-            .height(imageSizeDp)
+            .height(itemHeightDp)
             .offset {
-                IntOffset(offsetX.value.roundToInt(), 0)
+                IntOffset(
+                    (offsetX.value.roundToInt() - 2 * particleRadius.toInt()).coerceAtMost(
+                        funnelWidth.toInt()
+                    ), 0
+                )
             })
         {
             val numberOfExplosionParticles = 10
-            val particlePathAngle = Math.PI * 2 / numberOfExplosionParticles
+            val particleAngle = Math.PI * 2 / numberOfExplosionParticles
             var angle = 0.0
             repeat(numberOfExplosionParticles / 2 + 1) {
-                val hTranslation = cos(angle) * explosionRadius
-                val vTranslation = sin(angle) * explosionRadius
-                translate(hTranslation.toFloat(), vTranslation.toFloat()) {
-                    drawCircle(Red, explosionParticleRadius)
+                val hTranslation = (cos(angle).toFloat() * explosionRadius) * explosionPercentage.value
+                val vTranslation = (sin(angle).toFloat() * explosionRadius) * explosionPercentage.value
+
+                translate(hTranslation, vTranslation) {
+                    drawCircle(
+                        color = shoesArticle.color,
+                        radius = explosionParticleRadius,
+                        alpha = explosionPercentage.value / 2
+                    )
                 }
-                if (vTranslation != -vTranslation) {
-                    translate(hTranslation.toFloat(), -vTranslation.toFloat()) {
-                        drawCircle(Red, explosionParticleRadius)
+                if (angle != 0.0 && angle != Math.PI) {
+                    translate(hTranslation, -vTranslation) {
+                        drawCircle(
+                            color = shoesArticle.color,
+                            radius = explosionParticleRadius,
+                            alpha = explosionPercentage.value / 2
+                        )
                     }
                 }
-                angle += particlePathAngle
+                angle += particleAngle
             }
         }
 
         Box(
             Modifier
                 .padding(horizontal = 16.dp)
-                .swipeToDelete(offsetX) { onDelete() }
+                .swipeToDelete(offsetX, maximumWidth = sideShapeWidth) {
+                    onDeleted()
+                }
         ) {
             Column(
                 modifier = Modifier
@@ -150,7 +164,7 @@ fun ShoesCard(shoesArticle: ShoesArticle, onDelete: () -> Unit) {
             Image(
                 modifier = Modifier
                     .align(Alignment.CenterEnd)
-                    .size(imageSizeDp),
+                    .size(itemHeightDp),
                 painter = painterResource(id = shoesArticle.drawable),
                 contentDescription = ""
             )
@@ -175,34 +189,9 @@ fun ShoesCardPreview() {
     }
 }
 
-
-fun drawSideShape(radius: Float, particleRadius: Float): Path {
-    return Path().apply {
-        reset()
-        // Top arc
-        arcTo(
-            rect = Rect(
-                left = -particleRadius,
-                top = -(radius + particleRadius),
-                right = radius * 6f + particleRadius,
-                bottom = radius - particleRadius
-            ),
-            startAngleDegrees = 180.0f,
-            sweepAngleDegrees = -90.0f,
-            forceMoveTo = false
-        )
-        // Bottom arc
-        arcTo(
-            rect = Rect(
-                left = -particleRadius,
-                top = radius + particleRadius,
-                right = radius * 6 + particleRadius,
-                bottom = radius * 3 + particleRadius
-            ),
-            startAngleDegrees = 270.0f,
-            sweepAngleDegrees = -90.0f,
-            forceMoveTo = false
-        )
-        close()
-    }
+private fun Float.negateIfPositive(onPositive: () -> Unit): Float {
+    return if (this > 0) {
+        onPositive()
+        -this
+    } else this
 }

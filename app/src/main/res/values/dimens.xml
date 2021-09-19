@@ -5,6 +5,6 @@
     <dimen name="slot_padding">12dp</dimen>
     <dimen name="horizontal_item_padding">16dp</dimen>
     <dimen name="particle_radius">12dp</dimen>
-    <dimen name="explosion_particle_radius">5dp</dimen>
+    <dimen name="explosion_particle_radius">3dp</dimen>
     <dimen name="explosion_radius">40dp</dimen>
 </resources>
