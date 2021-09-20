@@ -1,6 +1,8 @@
 package com.example.listanimationsincompose.ui
 
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateIntAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -11,23 +13,46 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.listanimationsincompose.Main
 import com.example.listanimationsincompose.R
 import com.example.listanimationsincompose.model.ShoesArticle
+import com.example.listanimationsincompose.model.SlideState
 import com.example.listanimationsincompose.ui.theme.*
 
 @ExperimentalAnimationApi
 @Composable
-fun ShoesCard(shoesArticle: ShoesArticle) {
+fun ShoesCard(
+    shoesArticle: ShoesArticle,
+    slideState: SlideState,
+    shoesArticles: MutableList<ShoesArticle>,
+    updateSlidedState: (shoesArticle: ShoesArticle, slideState: SlideState) -> Unit,
+    updateItemPosition: (shoesArticle: ShoesArticle, destinationIndex: Int) -> Unit
+) {
+    val itemHeightDp = dimensionResource(id = R.dimen.image_size)
+    val itemHeight: Int
+    with(LocalDensity.current) {
+        itemHeight = itemHeightDp.toPx().toInt()
+    }
+    val verticalTranslation by animateIntAsState(
+        targetValue = when (slideState) {
+            SlideState.UP -> -itemHeight
+            SlideState.DOWN -> itemHeight
+            else -> 0
+        },
+    )
     Box(
         Modifier
             .padding(horizontal = 16.dp)
+            .dragToReorder(shoesArticle, shoesArticles, itemHeight, updateSlidedState, updateItemPosition)
+            .offset { IntOffset(0, verticalTranslation) }
     ) {
         Column(
             modifier = Modifier
@@ -67,7 +92,7 @@ fun ShoesCard(shoesArticle: ShoesArticle) {
         Image(
             modifier = Modifier
                 .align(Alignment.CenterEnd)
-                .size(dimensionResource(id = R.dimen.image_size)),
+                .size(itemHeightDp),
             painter = painterResource(id = shoesArticle.drawable),
             contentDescription = ""
         )
@@ -86,7 +111,11 @@ fun ShoesCardPreview() {
                 width = "2X",
                 drawable = R.drawable.ic_shoes_1,
                 color = Purple
-            )
+            ),
+            SlideState.NONE,
+            mutableListOf(),
+            { _, _ -> },
+            { _, _ -> }
         )
     }
 }

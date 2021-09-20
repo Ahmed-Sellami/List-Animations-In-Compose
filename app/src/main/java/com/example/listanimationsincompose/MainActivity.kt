@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.listanimationsincompose.model.ShoesArticle
+import com.example.listanimationsincompose.model.SlideState
 import com.example.listanimationsincompose.ui.ShoesCard
 import com.example.listanimationsincompose.ui.theme.*
 
@@ -59,6 +60,16 @@ val allShoesArticles = arrayOf(
 @Composable
 fun Home() {
     val shoesArticles = remember { mutableStateListOf(*allShoesArticles) }
+    val isSlidedStates = remember {
+        mutableStateMapOf<ShoesArticle, SlideState>()
+            .apply {
+                shoesArticles.map { shoesArticle ->
+                    shoesArticle to SlideState.NONE
+                }.toMap().also {
+                    putAll(it)
+                }
+            }
+    }
     Scaffold(
         topBar = {
             TopAppBar(
@@ -66,7 +77,7 @@ fun Home() {
                     Text(text = "List Animations In Compose")
                 },
                 actions = {
-                    IconButton(onClick = { /* Add item */ }) {
+                    IconButton(onClick = { shoesArticles.addAll(allShoesArticles) }) {
                         Icon(Icons.Filled.AddCircle, contentDescription = null)
                     }
                 },
@@ -76,7 +87,20 @@ fun Home() {
     ) { innerPadding ->
         ShoesList(
             modifier = Modifier.padding(innerPadding),
-            shoesArticles = shoesArticles
+            shoesArticles = shoesArticles,
+            isSlidedStates = isSlidedStates,
+            updateSlidedState = {shoesArticle, slideState -> isSlidedStates[shoesArticle] = slideState },
+            updateItemPosition = { shoesArticle, destinationIndex ->
+                shoesArticles.remove(shoesArticle)
+                shoesArticles.add(destinationIndex, shoesArticle)
+                isSlidedStates.apply {
+                    shoesArticles.map { shoesArticle ->
+                        shoesArticle to SlideState.NONE
+                    }.toMap().also {
+                        putAll(it)
+                    }
+                }
+            }
         )
     }
 }
@@ -85,7 +109,10 @@ fun Home() {
 @Composable
 fun ShoesList(
     modifier: Modifier,
-    shoesArticles: MutableList<ShoesArticle>
+    shoesArticles: MutableList<ShoesArticle>,
+    isSlidedStates: Map<ShoesArticle, SlideState>,
+    updateSlidedState: (shoesArticle: ShoesArticle, slideState: SlideState) -> Unit,
+    updateItemPosition: (shoesArticle: ShoesArticle, destinationIndex: Int) -> Unit
 ) {
     val lazyListState = rememberLazyListState()
     LazyColumn(
@@ -96,7 +123,14 @@ fun ShoesList(
             val shoesArticle = shoesArticles.getOrNull(index)
             if (shoesArticle != null) {
                 key(shoesArticle) {
-                    ShoesCard(shoesArticle = shoesArticle)
+                    val slideState = isSlidedStates[shoesArticle] ?: SlideState.NONE
+                    ShoesCard(
+                        shoesArticle = shoesArticle,
+                        slideState = slideState,
+                        shoesArticles = shoesArticles,
+                        updateSlidedState = updateSlidedState,
+                        updateItemPosition = updateItemPosition
+                    )
                 }
             }
         }
