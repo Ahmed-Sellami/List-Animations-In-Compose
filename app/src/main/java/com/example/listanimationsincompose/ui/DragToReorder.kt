@@ -16,6 +16,7 @@ import com.example.listanimationsincompose.model.ShoesArticle
 import com.example.listanimationsincompose.model.SlideState
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.plus
 import kotlin.math.roundToInt
 
 fun Modifier.dragToReorder(
@@ -38,6 +39,8 @@ fun Modifier.dragToReorder(
                 offsetY.stop()
 
                 var numberOfSlidedItems = 0
+                var previousNumberOfItems: Int
+                var listOffset = 0
                 // Wait for drag events.
                 awaitPointerEventScope {
                     drag(pointerId) { change ->
@@ -48,20 +51,39 @@ fun Modifier.dragToReorder(
                         val verticalDragOffset = offsetY.value + change.positionChange().y
                         launch {
                             offsetY.snapTo(verticalDragOffset)
+                            previousNumberOfItems = numberOfSlidedItems
                             numberOfSlidedItems = if (offsetY.value > 0) {
-                                slideItemsFromBottomToTop(offsetY.value, itemHeight) { listOffset ->
+                                val numberOfItems = (offsetY.value / itemHeight).toInt()
+                                if (numberOfItems != 0) {
                                     updateSlidedState(
-                                        shoesArticles[shoesArticles.indexOf(shoesArticle) + listOffset],
+                                        shoesArticles[shoesArticles.indexOf(shoesArticle) + numberOfItems],
                                         SlideState.UP
                                     )
                                 }
-                            } else {
-                                -slideItemsFromTopToBottom(offsetY.value, itemHeight) { listOffset ->
+                                if (previousNumberOfItems > numberOfItems) {
                                     updateSlidedState(
-                                        shoesArticles[shoesArticles.indexOf(shoesArticle) - listOffset],
+                                        shoesArticles[shoesArticles.indexOf(shoesArticle) + previousNumberOfItems],
+                                        SlideState.NONE
+                                    )
+                                }
+                                listOffset = numberOfItems
+                                numberOfItems
+                            } else {
+                                val numberOfItems = (-offsetY.value / itemHeight).toInt()
+                                if (numberOfItems != 0) {
+                                    updateSlidedState(
+                                        shoesArticles[shoesArticles.indexOf(shoesArticle) - numberOfItems],
                                         SlideState.DOWN
                                     )
                                 }
+                                if (previousNumberOfItems > numberOfItems) {
+                                    updateSlidedState(
+                                        shoesArticles[shoesArticles.indexOf(shoesArticle) - previousNumberOfItems],
+                                        SlideState.NONE
+                                    )
+                                }
+                                listOffset = -numberOfItems
+                                numberOfItems
                             }
                         }
                         // Consume the gesture event, not passed to external
@@ -77,7 +99,7 @@ fun Modifier.dragToReorder(
                     }
                 } else {
                     val currentIndex = shoesArticles.indexOf(shoesArticle)
-                    updateItemPosition(shoesArticle, currentIndex + numberOfSlidedItems)
+                    updateItemPosition(shoesArticle, currentIndex + listOffset)
                 }
             }
         }
@@ -86,34 +108,4 @@ fun Modifier.dragToReorder(
             // Use the animating offset value here.
             IntOffset(offsetX.value.roundToInt(), offsetY.value.roundToInt())
         }
-}
-
-private fun slideItemsFromBottomToTop(
-    offsetY: Float,
-    itemHeight: Int,
-    slide: (listOffset: Int) -> Unit
-): Int {
-    var listOffset = 1
-    var mutableOffsetY = offsetY
-    while (mutableOffsetY - itemHeight >= 0) {
-        slide(listOffset)
-        listOffset++
-        mutableOffsetY -= itemHeight
-    }
-    return listOffset - 1
-}
-
-private fun slideItemsFromTopToBottom(
-    offsetY: Float,
-    itemHeight: Int,
-    slide: (listOffset: Int) -> Unit
-): Int {
-    var listOffset = 1
-    var mutableOffsetY = offsetY
-    while (mutableOffsetY + itemHeight <= 0) {
-        slide(listOffset)
-        listOffset++
-        mutableOffsetY += itemHeight
-    }
-    return listOffset - 1
 }
