@@ -12,6 +12,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
@@ -52,6 +53,8 @@ fun ShoesCard(
     )
     val isDragged = remember { mutableStateOf(false) }
     val zIndex = if (isDragged.value) 1.0f else 0.0f
+    val rotation = if (isDragged.value) -5.0f else 0.0f
+    val elevation = if (isDragged.value) 8.dp else 0.dp
     Box(
         Modifier
             .padding(horizontal = 16.dp)
@@ -66,9 +69,11 @@ fun ShoesCard(
             )
             .offset { IntOffset(0, verticalTranslation) }
             .zIndex(zIndex)
+            .rotate(rotation)
     ) {
         Column(
             modifier = Modifier
+                .shadow(elevation, RoundedCornerShape(8.dp))
                 .clip(RoundedCornerShape(8.dp))
                 .background(
                     color = shoesArticle.color
