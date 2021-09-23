@@ -12,6 +12,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.dimensionResource
@@ -21,6 +22,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import com.example.listanimationsincompose.Main
 import com.example.listanimationsincompose.R
 import com.example.listanimationsincompose.model.ShoesArticle
@@ -48,11 +50,22 @@ fun ShoesCard(
             else -> 0
         },
     )
+    val isDragged = remember { mutableStateOf(false) }
+    val zIndex = if (isDragged.value) 1.0f else 0.0f
     Box(
         Modifier
             .padding(horizontal = 16.dp)
-            .dragToReorder(shoesArticle, shoesArticles, itemHeight, updateSlidedState, updateItemPosition)
+            .dragToReorder(
+                shoesArticle,
+                shoesArticles,
+                itemHeight,
+                { isDragged.value = true },
+                { isDragged.value = false },
+                updateSlidedState,
+                updateItemPosition
+            )
             .offset { IntOffset(0, verticalTranslation) }
+            .zIndex(zIndex)
     ) {
         Column(
             modifier = Modifier
@@ -62,7 +75,8 @@ fun ShoesCard(
                 )
                 .padding(dimensionResource(id = R.dimen.slot_padding))
                 .align(Alignment.CenterStart)
-                .fillMaxWidth(),
+                .fillMaxWidth()
+
         ) {
             Text(
                 shoesArticle.title,

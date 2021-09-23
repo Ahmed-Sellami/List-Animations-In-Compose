@@ -22,6 +22,8 @@ fun Modifier.dragToReorder(
     shoesArticle: ShoesArticle,
     shoesArticles: MutableList<ShoesArticle>,
     itemHeight: Int,
+    onDrag: () -> Unit,
+    onStopDrag: () -> Unit,
     updateSlidedState: (shoesArticle: ShoesArticle, slideState: SlideState) -> Unit,
     updateItemPosition: (shoesArticle: ShoesArticle, destinationIndex: Int) -> Unit
 ): Modifier = composed {
@@ -44,6 +46,7 @@ fun Modifier.dragToReorder(
                 // Wait for drag events.
                 awaitPointerEventScope {
                     drag(pointerId) { change ->
+                        onDrag()
                         val horizontalDragOffset = offsetX.value + change.positionChange().x
                         launch {
                             offsetX.snapTo(horizontalDragOffset)
@@ -77,6 +80,7 @@ fun Modifier.dragToReorder(
                         change.consumePositionChange()
                     }
                 }
+                onStopDrag()
                 if (numberOfItems == 0) {
                     launch {
                         offsetX.animateTo(0f)
