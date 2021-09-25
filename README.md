@@ -9,7 +9,7 @@ This repository is the resource of a series of articles. Each branch represents 
   </tr>
   <tr>
     <td><img src="pics/Add_Item.png"/>https://developersbreach.com/add-item-animation-compose/</td>
-    <td></td> 
+    <td>https://developersbreach.com/swipe-to-delete-compose/</td> 
     <td></td>
   </tr>
 </table>
