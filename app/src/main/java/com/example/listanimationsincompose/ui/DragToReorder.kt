@@ -71,7 +71,7 @@ fun Modifier.dragToReorder(
                                     )
                                 } catch (e: IndexOutOfBoundsException) {
                                     numberOfItems = previousNumberOfItems
-                                    Log.i("DragToReorder", "Item is on the edge or outside")
+                                    Log.i("DragToReorder", "Item is outside or at the edge")
                                 }
                             }
                             if (previousNumberOfItems > numberOfItems) {
