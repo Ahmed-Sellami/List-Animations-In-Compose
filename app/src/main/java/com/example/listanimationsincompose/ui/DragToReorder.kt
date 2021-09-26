@@ -1,5 +1,6 @@
 package com.example.listanimationsincompose.ui
 
+import android.util.Log
 import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.drag
@@ -7,14 +8,13 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
-import androidx.compose.ui.input.pointer.consumePositionChange
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.input.pointer.positionChange
+import androidx.compose.ui.input.pointer.*
 import androidx.compose.ui.unit.IntOffset
 import com.example.listanimationsincompose.model.ShoesArticle
 import com.example.listanimationsincompose.model.SlideState
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
+import java.lang.IndexOutOfBoundsException
 import kotlin.math.roundToInt
 import kotlin.math.sign
 
@@ -22,10 +22,9 @@ fun Modifier.dragToReorder(
     shoesArticle: ShoesArticle,
     shoesArticles: MutableList<ShoesArticle>,
     itemHeight: Int,
-    onDrag: () -> Unit,
-    onStopDrag: () -> Unit,
     updateSlidedState: (shoesArticle: ShoesArticle, slideState: SlideState) -> Unit,
-    updateItemPosition: (shoesArticle: ShoesArticle, destinationIndex: Int) -> Unit
+    onDrag: () -> Unit,
+    onStopDrag: (currentIndex: Int, destinationIndex: Int) -> Unit,
 ): Modifier = composed {
     val offsetX = remember { Animatable(0f) }
     val offsetY = remember { Animatable(0f) }
@@ -39,7 +38,7 @@ fun Modifier.dragToReorder(
                 offsetX.stop()
                 offsetY.stop()
 
-                val offsetToSlide = itemHeight / 5
+                val offsetToSlide = itemHeight / 4
                 var numberOfItems = 0
                 var previousNumberOfItems: Int
                 var listOffset = 0
@@ -51,26 +50,33 @@ fun Modifier.dragToReorder(
                         launch {
                             offsetX.snapTo(horizontalDragOffset)
                         }
+                        val offsetSign = offsetY.value.sign.toInt()
+                        val shoesArticleIndex = shoesArticles.indexOf(shoesArticle)
                         val verticalDragOffset = offsetY.value + change.positionChange().y
                         launch {
                             offsetY.snapTo(verticalDragOffset)
                             previousNumberOfItems = numberOfItems
-                            val offsetSign = offsetY.value.sign.toInt()
                             numberOfItems = calculateNumberOfSlidedItems(
                                 offsetY.value * offsetSign,
                                 itemHeight,
                                 offsetToSlide,
                                 previousNumberOfItems
                             )
+
                             if (numberOfItems != 0) {
-                                updateSlidedState(
-                                    shoesArticles[shoesArticles.indexOf(shoesArticle) + numberOfItems * offsetSign],
-                                    if (offsetSign == 1) SlideState.UP else SlideState.DOWN
-                                )
+                                try {
+                                    updateSlidedState(
+                                        shoesArticles[shoesArticleIndex + numberOfItems * offsetSign],
+                                        if (offsetSign == 1) SlideState.UP else SlideState.DOWN
+                                    )
+                                } catch (e: IndexOutOfBoundsException) {
+                                    numberOfItems = previousNumberOfItems
+                                    Log.i("DragToReorder", "Item is on the edge or outside")
+                                }
                             }
                             if (previousNumberOfItems > numberOfItems) {
                                 updateSlidedState(
-                                    shoesArticles[shoesArticles.indexOf(shoesArticle) + previousNumberOfItems * offsetSign],
+                                    shoesArticles[shoesArticleIndex + previousNumberOfItems * offsetSign],
                                     SlideState.NONE
                                 )
                             }
@@ -80,17 +86,13 @@ fun Modifier.dragToReorder(
                         change.consumePositionChange()
                     }
                 }
-                onStopDrag()
-                if (numberOfItems == 0) {
-                    launch {
-                        offsetX.animateTo(0f)
-                    }
-                    launch {
-                        offsetY.animateTo(0f)
-                    }
-                } else {
-                    val currentIndex = shoesArticles.indexOf(shoesArticle)
-                    updateItemPosition(shoesArticle, currentIndex + listOffset)
+                val currentIndex = shoesArticles.indexOf(shoesArticle)
+                launch {
+                    offsetX.animateTo(0f)
+                }
+                launch {
+                    offsetY.animateTo(itemHeight * numberOfItems * offsetY.value.sign)
+                    onStopDrag(currentIndex, currentIndex + listOffset)
                 }
             }
         }

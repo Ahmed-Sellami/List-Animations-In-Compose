@@ -60,7 +60,7 @@ val allShoesArticles = arrayOf(
 @Composable
 fun Home() {
     val shoesArticles = remember { mutableStateListOf(*allShoesArticles) }
-    val isSlidedStates = remember {
+    val slideStates = remember {
         mutableStateMapOf<ShoesArticle, SlideState>()
             .apply {
                 shoesArticles.map { shoesArticle ->
@@ -88,12 +88,21 @@ fun Home() {
         ShoesList(
             modifier = Modifier.padding(innerPadding),
             shoesArticles = shoesArticles,
-            isSlidedStates = isSlidedStates,
-            updateSlidedState = {shoesArticle, slideState -> isSlidedStates[shoesArticle] = slideState },
-            updateItemPosition = { shoesArticle, destinationIndex ->
-                shoesArticles.remove(shoesArticle)
-                shoesArticles.add(destinationIndex, shoesArticle)
-                isSlidedStates.apply {
+            slideStates = slideStates,
+            updateSlidedState = { shoesArticle, slideState -> slideStates[shoesArticle] = slideState },
+            updateItemPosition = { currentIndex, destinationIndex ->
+                val shoesArticle = shoesArticles[currentIndex]
+                if (currentIndex < destinationIndex) {
+                    for (i in currentIndex until destinationIndex) {
+                        shoesArticles[i] = shoesArticles[i+1]
+                    }
+                } else {
+                    for (i in currentIndex downTo destinationIndex + 1) {
+                        shoesArticles[i] = shoesArticles[i-1]
+                    }
+                }
+                shoesArticles[destinationIndex] = shoesArticle
+                slideStates.apply {
                     shoesArticles.map { shoesArticle ->
                         shoesArticle to SlideState.NONE
                     }.toMap().also {
@@ -110,9 +119,9 @@ fun Home() {
 fun ShoesList(
     modifier: Modifier,
     shoesArticles: MutableList<ShoesArticle>,
-    isSlidedStates: Map<ShoesArticle, SlideState>,
+    slideStates: Map<ShoesArticle, SlideState>,
     updateSlidedState: (shoesArticle: ShoesArticle, slideState: SlideState) -> Unit,
-    updateItemPosition: (shoesArticle: ShoesArticle, destinationIndex: Int) -> Unit
+    updateItemPosition: (currentIndex: Int, destinationIndex: Int) -> Unit
 ) {
     val lazyListState = rememberLazyListState()
     LazyColumn(
@@ -123,7 +132,7 @@ fun ShoesList(
             val shoesArticle = shoesArticles.getOrNull(index)
             if (shoesArticle != null) {
                 key(shoesArticle) {
-                    val slideState = isSlidedStates[shoesArticle] ?: SlideState.NONE
+                    val slideState = slideStates[shoesArticle] ?: SlideState.NONE
                     ShoesCard(
                         shoesArticle = shoesArticle,
                         slideState = slideState,
