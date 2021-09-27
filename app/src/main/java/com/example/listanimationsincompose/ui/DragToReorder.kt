@@ -50,11 +50,11 @@ fun Modifier.dragToReorder(
                         launch {
                             offsetX.snapTo(horizontalDragOffset)
                         }
-                        val offsetSign = offsetY.value.sign.toInt()
-                        val shoesArticleIndex = shoesArticles.indexOf(shoesArticle)
                         val verticalDragOffset = offsetY.value + change.positionChange().y
                         launch {
                             offsetY.snapTo(verticalDragOffset)
+                            val offsetSign = offsetY.value.sign.toInt()
+                            val shoesArticleIndex = shoesArticles.indexOf(shoesArticle)
                             previousNumberOfItems = numberOfItems
                             numberOfItems = calculateNumberOfSlidedItems(
                                 offsetY.value * offsetSign,

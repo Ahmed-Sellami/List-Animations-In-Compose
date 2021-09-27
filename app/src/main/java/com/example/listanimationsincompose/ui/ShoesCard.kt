@@ -125,13 +125,13 @@ fun ShoesCard(
             .zIndex(zIndex)
             .rotate(rotation)
     ) {
-        leftParticles.forEach {
-            Canvas(modifier = Modifier) {
+        Canvas(modifier = Modifier) {
+            leftParticles.forEach {
                 drawCircle(it.color, it.radius, center = IntOffset(it.x, it.y).toOffset())
             }
         }
-        rightParticles.forEach {
-            Canvas(modifier = Modifier.align(Alignment.TopEnd)) {
+        Canvas(modifier = Modifier.align(Alignment.TopEnd)) {
+            rightParticles.forEach {
                 drawCircle(it.color, it.radius, center = IntOffset(it.x, it.y).toOffset())
             }
         }
