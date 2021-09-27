@@ -92,16 +92,8 @@ fun Home() {
             updateSlidedState = { shoesArticle, slideState -> slideStates[shoesArticle] = slideState },
             updateItemPosition = { currentIndex, destinationIndex ->
                 val shoesArticle = shoesArticles[currentIndex]
-                if (currentIndex < destinationIndex) {
-                    for (i in currentIndex until destinationIndex) {
-                        shoesArticles[i] = shoesArticles[i+1]
-                    }
-                } else {
-                    for (i in currentIndex downTo destinationIndex + 1) {
-                        shoesArticles[i] = shoesArticles[i-1]
-                    }
-                }
-                shoesArticles[destinationIndex] = shoesArticle
+                shoesArticles.removeAt(currentIndex)
+                shoesArticles.add(destinationIndex, shoesArticle)
                 slideStates.apply {
                     shoesArticles.map { shoesArticle ->
                         shoesArticle to SlideState.NONE
