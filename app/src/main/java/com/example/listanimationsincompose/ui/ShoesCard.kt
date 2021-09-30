@@ -35,7 +35,7 @@ import kotlinx.coroutines.launch
 import kotlin.math.cos
 import kotlin.math.sin
 
-private val particlesRadii = mutableListOf<Float>()
+private val particlesStreamRadii = mutableListOf<Float>()
 private var itemHeight = 0
 private var particleRadius = 0f
 private var slotItemDifference = 0f
@@ -54,8 +54,8 @@ fun ShoesCard(
     with(LocalDensity.current) {
         itemHeight = itemHeightDp.toPx().toInt()
         particleRadius = dimensionResource(id = R.dimen.particle_radius).toPx()
-        if (particlesRadii.isEmpty())
-            particlesRadii.addAll(arrayOf(6.dp.toPx(), 10.dp.toPx(), 14.dp.toPx()))
+        if (particlesStreamRadii.isEmpty())
+            particlesStreamRadii.addAll(arrayOf(6.dp.toPx(), 10.dp.toPx(), 14.dp.toPx()))
         slotItemDifference = 18.dp.toPx()
     }
     val verticalTranslation by animateIntAsState(
@@ -183,16 +183,16 @@ fun ShoesCard(
 
 private fun createParticles(rotation: Double, color: Color, isLeft: Boolean): List<Particle> {
     val particles = mutableListOf<Particle>()
-    for (i in 0 until particlesRadii.size) {
-        val currentParticleRadius = particleRadius * (i + 1) / particlesRadii.size
+    for (i in 0 until particlesStreamRadii.size) {
+        val currentParticleRadius = particleRadius * (i + 1) / particlesStreamRadii.size
         val verticalOffset =
-            (itemHeight.toFloat() - particlesRadii[i] - slotItemDifference + currentParticleRadius).toInt()
+            (itemHeight.toFloat() - particlesStreamRadii[i] - slotItemDifference + currentParticleRadius).toInt()
         val horizontalOffset = currentParticleRadius.toInt()
         particles.add(
             Particle(
-                color = color.copy(alpha = (i + 1) / (particlesRadii.size).toFloat()),
-                x = (particlesRadii[i] * cos(rotation)).toInt() + if (isLeft) horizontalOffset else -horizontalOffset,
-                y = (particlesRadii[i] * sin(rotation)).toInt() + verticalOffset,
+                color = color.copy(alpha = (i + 1) / (particlesStreamRadii.size).toFloat()),
+                x = (particlesStreamRadii[i] * cos(rotation)).toInt() + if (isLeft) horizontalOffset else -horizontalOffset,
+                y = (particlesStreamRadii[i] * sin(rotation)).toInt() + verticalOffset,
                 radius = currentParticleRadius
             )
         )
