@@ -1,6 +1,5 @@
 package com.example.listanimationsincompose.ui
 
-import android.util.Log
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
@@ -47,7 +46,7 @@ fun ShoesCard(
     shoesArticle: ShoesArticle,
     slideState: SlideState,
     shoesArticles: MutableList<ShoesArticle>,
-    updateSlidedState: (shoesArticle: ShoesArticle, slideState: SlideState) -> Unit,
+    updateSlideState: (shoesArticle: ShoesArticle, slideState: SlideState) -> Unit,
     updateItemPosition: (currentIndex: Int, destinationIndex: Int) -> Unit
 ) {
     val itemHeightDp = dimensionResource(id = R.dimen.image_size)
@@ -112,7 +111,7 @@ fun ShoesCard(
                 shoesArticle,
                 shoesArticles,
                 itemHeight,
-                updateSlidedState,
+                updateSlideState,
                 { isDragged.value = true },
                 { cIndex, dIndex ->
                     isDragged.value = false

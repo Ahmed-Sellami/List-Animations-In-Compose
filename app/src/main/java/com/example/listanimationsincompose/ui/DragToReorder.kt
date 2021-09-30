@@ -22,7 +22,7 @@ fun Modifier.dragToReorder(
     shoesArticle: ShoesArticle,
     shoesArticles: MutableList<ShoesArticle>,
     itemHeight: Int,
-    updateSlidedState: (shoesArticle: ShoesArticle, slideState: SlideState) -> Unit,
+    updateSlideState: (shoesArticle: ShoesArticle, slideState: SlideState) -> Unit,
     onDrag: () -> Unit,
     onStopDrag: (currentIndex: Int, destinationIndex: Int) -> Unit,
 ): Modifier = composed {
@@ -38,6 +38,7 @@ fun Modifier.dragToReorder(
                 offsetX.stop()
                 offsetY.stop()
 
+                val shoesArticleIndex = shoesArticles.indexOf(shoesArticle)
                 val offsetToSlide = itemHeight / 4
                 var numberOfItems = 0
                 var previousNumberOfItems: Int
@@ -54,18 +55,22 @@ fun Modifier.dragToReorder(
                         launch {
                             offsetY.snapTo(verticalDragOffset)
                             val offsetSign = offsetY.value.sign.toInt()
-                            val shoesArticleIndex = shoesArticles.indexOf(shoesArticle)
                             previousNumberOfItems = numberOfItems
-                            numberOfItems = calculateNumberOfSlidedItems(
+                            numberOfItems = calculateNumberOfSlidItems(
                                 offsetY.value * offsetSign,
                                 itemHeight,
                                 offsetToSlide,
                                 previousNumberOfItems
                             )
 
-                            if (numberOfItems != 0) {
+                            if (previousNumberOfItems > numberOfItems) {
+                                updateSlideState(
+                                    shoesArticles[shoesArticleIndex + previousNumberOfItems * offsetSign],
+                                    SlideState.NONE
+                                )
+                            } else if (numberOfItems != 0) {
                                 try {
-                                    updateSlidedState(
+                                    updateSlideState(
                                         shoesArticles[shoesArticleIndex + numberOfItems * offsetSign],
                                         if (offsetSign == 1) SlideState.UP else SlideState.DOWN
                                     )
@@ -74,25 +79,18 @@ fun Modifier.dragToReorder(
                                     Log.i("DragToReorder", "Item is outside or at the edge")
                                 }
                             }
-                            if (previousNumberOfItems > numberOfItems) {
-                                updateSlidedState(
-                                    shoesArticles[shoesArticleIndex + previousNumberOfItems * offsetSign],
-                                    SlideState.NONE
-                                )
-                            }
                             listOffset = numberOfItems * offsetSign
                         }
                         // Consume the gesture event, not passed to external
                         change.consumePositionChange()
                     }
                 }
-                val currentIndex = shoesArticles.indexOf(shoesArticle)
                 launch {
                     offsetX.animateTo(0f)
                 }
                 launch {
                     offsetY.animateTo(itemHeight * numberOfItems * offsetY.value.sign)
-                    onStopDrag(currentIndex, currentIndex + listOffset)
+                    onStopDrag(shoesArticleIndex, shoesArticleIndex + listOffset)
                 }
             }
         }
@@ -103,7 +101,7 @@ fun Modifier.dragToReorder(
         }
 }
 
-private fun calculateNumberOfSlidedItems(
+private fun calculateNumberOfSlidItems(
     offsetY: Float,
     itemHeight: Int,
     offsetToSlide: Int,
@@ -112,13 +110,10 @@ private fun calculateNumberOfSlidedItems(
     val numberOfItemsInOffset = (offsetY / itemHeight).toInt()
     val numberOfItemsPlusOffset = ((offsetY + offsetToSlide) / itemHeight).toInt()
     val numberOfItemsMinusOffset = ((offsetY - offsetToSlide - 1) / itemHeight).toInt()
-    return if (offsetY - offsetToSlide - 1 < 0) {
-        0
-    } else if (numberOfItemsPlusOffset > numberOfItemsInOffset && numberOfItemsMinusOffset == numberOfItemsInOffset) {
-        numberOfItemsPlusOffset
-    } else if (numberOfItemsMinusOffset < numberOfItemsInOffset && numberOfItemsPlusOffset == numberOfItemsInOffset) {
-        numberOfItemsInOffset
-    } else {
-        previousNumberOfItems
+    return when {
+        offsetY - offsetToSlide - 1 < 0 -> 0
+        numberOfItemsPlusOffset > numberOfItemsInOffset -> numberOfItemsPlusOffset
+        numberOfItemsMinusOffset < numberOfItemsInOffset -> numberOfItemsInOffset
+        else -> previousNumberOfItems
     }
 }

@@ -89,7 +89,7 @@ fun Home() {
             modifier = Modifier.padding(innerPadding),
             shoesArticles = shoesArticles,
             slideStates = slideStates,
-            updateSlidedState = { shoesArticle, slideState -> slideStates[shoesArticle] = slideState },
+            updateSlideState = { shoesArticle, slideState -> slideStates[shoesArticle] = slideState },
             updateItemPosition = { currentIndex, destinationIndex ->
                 val shoesArticle = shoesArticles[currentIndex]
                 shoesArticles.removeAt(currentIndex)
@@ -112,7 +112,7 @@ fun ShoesList(
     modifier: Modifier,
     shoesArticles: MutableList<ShoesArticle>,
     slideStates: Map<ShoesArticle, SlideState>,
-    updateSlidedState: (shoesArticle: ShoesArticle, slideState: SlideState) -> Unit,
+    updateSlideState: (shoesArticle: ShoesArticle, slideState: SlideState) -> Unit,
     updateItemPosition: (currentIndex: Int, destinationIndex: Int) -> Unit
 ) {
     val lazyListState = rememberLazyListState()
@@ -129,7 +129,7 @@ fun ShoesList(
                         shoesArticle = shoesArticle,
                         slideState = slideState,
                         shoesArticles = shoesArticles,
-                        updateSlidedState = updateSlidedState,
+                        updateSlideState = updateSlideState,
                         updateItemPosition = updateItemPosition
                     )
                 }
