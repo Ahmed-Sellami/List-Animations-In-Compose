@@ -9,8 +9,8 @@ This repository is the resource of a series of articles. Each branch represents 
   </tr>
   <tr>
     <td><img src="pics/Add_Item.png"/>https://developersbreach.com/add-item-animation-compose/</td>
-    <td>https://developersbreach.com/swipe-to-delete-compose/</td> 
-    <td></td>
+    <td><img src="pics/Swipe_To_Delete.png"/>https://developersbreach.com/swipe-to-delete-compose/</td>
+    <td><img src="pics/Drag_To_Reorder.png"/>https://developersbreach.com/drag-to-reorder-compose/</td>
   </tr>
 </table>
 
