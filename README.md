@@ -1,6 +1,10 @@
 # List Animations In Compose
 This repository is the resource of a series of articles. Each branch represents the final version of a use case that was built on `base` branch.
 
+## Preview
+<img src="pics/preview.gif"/>
+
+## Articles
 <table style="width:100%">
   <tr>
     <th>Add an item</th>
