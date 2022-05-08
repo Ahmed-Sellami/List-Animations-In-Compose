@@ -78,7 +78,16 @@ fun Home() {
                     Text(text = "List Animations In Compose")
                 },
                 actions = {
-                    IconButton(onClick = { shoesArticles.addAll(allShoesArticles) }) {
+                    IconButton(onClick = {
+                        val newShoesArticles = mutableListOf<ShoesArticle>()
+                        ShoesArticle.ID += 1
+                        allShoesArticles.forEach {
+                            newShoesArticles.add(it.copy(id = ShoesArticle.ID))
+                        }
+
+                        shoesArticles.addAll(newShoesArticles)
+                        Log.i("MainActivity", shoesArticles.toList().toString())
+                    }) {
                         Icon(Icons.Filled.AddCircle, contentDescription = null)
                     }
                 },

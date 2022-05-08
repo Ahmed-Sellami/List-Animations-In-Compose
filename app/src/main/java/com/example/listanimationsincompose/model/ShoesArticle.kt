@@ -9,4 +9,8 @@ data class ShoesArticle(
     var width: String = "",
     var drawable: Int = 0,
     var color: Color = Color.Transparent
-)
+) {
+    companion object {
+        var ID = 0
+    }
+}
