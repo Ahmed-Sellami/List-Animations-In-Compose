@@ -1,6 +1,7 @@
 package com.example.listanimationsincompose
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -24,7 +25,7 @@ import com.example.listanimationsincompose.ui.ShoesCard
 import com.example.listanimationsincompose.ui.theme.*
 
 class MainActivity : ComponentActivity() {
-    @ExperimentalAnimationApi
+    @OptIn(ExperimentalAnimationApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
