@@ -112,6 +112,7 @@ fun ShoesCard(
                 shoesArticles,
                 itemHeight,
                 updateSlideState,
+                isDraggedAfterLongPress = true,
                 { isDragged.value = true },
                 { cIndex, dIndex ->
                     isDragged.value = false
